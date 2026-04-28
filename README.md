@@ -1,73 +1,112 @@
-[README.md](https://github.com/user-attachments/files/27101857/README.md)
-# NBWindows 🪟
+[README.md](https://github.com/user-attachments/files/27172100/README.md)
+# NBWindows
 
-> 一个轻量级的 macOS 窗口管理器悬浮栏，实时显示当前有窗口的应用
+为 macOS Dock 带来 Windows 风格的任务栏交互体验——点击当前前台 app 的 Dock 图标，即可最小化窗口；再次点击还原。
 
-![NBWindows 截图](https://via.placeholder.com/600x80/1a1a1a/ffffff?text=NBWindows)
+> 🪟 一个轻量的 macOS 小工具，单 Swift 文件，无任何第三方依赖。
 
-## 为什么需要它？
+## 功能一览
 
-macOS 的 Dock 和调度中心不够直观：
+- **Windows 风格 Dock 点击** — 前台 app 的 Dock 图标一点即最小化，再点还原
+- **悬浮窗口栏** — 屏幕顶部半透明面板，列出所有有窗口的 app，点击切换最小化/还原；支持右键关闭/排除，拖拽移位，锁定位置
+- **Dock 状态指示灯** — 每个 app 的 Dock 图标上方显示彩色圆点：🟢 窗口可见，🟠 已最小化
+- **App 排除** — 右键悬浮栏中的 app 可隐藏，随时从菜单栏恢复
+- **位置记忆** — 悬浮栏位置重启后保持不变
 
-- **点了 ❌ 关闭的应用** → Dock 里图标还在，但你知道它有没有窗口吗？
-- **最小化的应用** → 调度中心不显示
-- **桌面一堆窗口** → 有时候根本不知道哪些程序开着
+## 系统要求
 
-**NBWindows** 用一个悬浮栏清晰告诉你：**当前哪些应用真的有窗口**。
+- macOS 13 Ventura 及以上
+- **关键：需要辅助功能权限**（首次启动时会弹出授权提示）
 
-## 功能
+## 安装（给首次使用的用户）
 
-- 🔲 **悬浮栏** — 显示所有有窗口的应用图标（含最小化的）
-- 🅧 **点 ❌ 关闭的应用不显示** — 只显示真正有窗口的
-- 🔄 **左键切换** — 在前时最小化，不在前时聚焦到前（Windows 风格）
-- 🖱️ **右键关闭** — 右键图标 → 关闭窗口（和点红 × 一样，不退出应用）
-- 🔒 **锁按钮** — 锁定/解锁悬浮栏位置
-- 🟢🟠🔵 **状态指示** — 右下角颜色条标明窗口状态
-- ↕️ **拖拽任意位置** — 想放哪放哪，位置记忆
-- 🚀 **跨空间** — 所有桌面空间都能看到
+### 快速安装（推荐）
 
-## 安装
+1. 打开 `NBWindows.dmg`
+2. **先双击「安装 NBWindows.command」**——它会自动完成：复制 app 到 `/Applications/` → 解除 macOS 隔离 → 启动 app
+3. 按系统提示，前往 **系统设置 → 隐私与安全性 → 辅助功能**，找到 `NBWindows` 并**勾选** ✅
+4. 完成！以后双击 `NBWindows.app` 即可启动
 
-### 直接使用
-
-下载 `NBWindows.app`，拖到「应用程序」文件夹，打开即可。
-
-> ⚠️ **首次使用**：需要授予辅助功能权限
-> 系统设置 → 隐私与安全性 → 辅助功能 → 添加 NBWindows.app
-
-### 自行编译
+### 手动安装
 
 ```bash
-# 需要 Xcode Command Line Tools
-git clone [你的仓库地址]
-cd NBWindows
-swiftc -o NBWindows main.swift
-# 或者直接 open NBWindows.app（如果已打包）
-```
-
-## 管理
-
-```bash
-# 启动
+cp -r NBWindows.app /Applications/
+xattr -dr com.apple.quarantine /Applications/NBWindows.app
 open /Applications/NBWindows.app
-
-# 停止（菜单栏图标 → 退出）
-# 或在终端：
-pkill NBWindows
 ```
 
-## 技术细节
+然后按提示授权辅助功能权限。
 
-- 纯 **Swift + SwiftUI** 原生开发
-- 使用 **Accessibility API (AX)** 获取窗口状态
-- 使用 **CGWindowList** 判断窗口可见性
-- 无任何第三方依赖
-- 支持 **Intel (x86_64)** 和 **Apple Silicon (arm64)**
+## ⚠️ 重要注意事项
 
-## 隐私
+### 🔑 辅助功能权限
 
-- **完全本地运行**，不联网，不上传任何数据
-- 源代码在 App 包内 `Contents/Resources/main.swift`，欢迎审查
+NBWindows 需要辅助功能权限才能拦截 Dock 点击和操作窗口。请在 **系统设置 → 隐私与安全性 → 辅助功能** 中确保 `NBWindows` 已被勾选。
+
+如果勾选后仍不生效，可以查看日志确认：
+```bash
+tail -f /tmp/nbw*.log
+```
+如果看到 `AXIsProcessTrusted=false`，说明权限未正确授予。
+
+### 🔄 授权后仍不能用？请重启！
+
+**如果已经授权了辅助功能，但点击 Dock 图标仍然没有反应，请先尝试以下操作：**
+
+1. 退出 NBWindows（点击菜单栏图标 → 退出）
+2. **重启电脑**，或者**注销后重新登录**
+3. 重新打开 NBWindows
+
+> 为什么需要重启？macOS 对辅助功能权限的授权会在 app 启动时缓存，授权需要在 app **重启之后**（有时甚至在系统重启之后）才能生效。这是一个 macOS 系统的已知行为，不是 bug。
+
+### 🔁 重新构建后权限失效
+
+如果你从源码重新构建 NBWindows，必须使用 `--identifier "com.nb.windows"` 签名，否则 macOS 会认为这是一个新 app，辅助功能权限会失效，需要重新授权。
+
+使用 `build.sh` 脚本构建可以自动处理这个问题。
+
+## 使用方法
+
+| 操作 | 效果 |
+|---|---|
+| 点击前台 app 的 Dock 图标 | 最小化窗口 |
+| 点击已最小化 app 的 Dock 图标 | 还原窗口 |
+| 点击悬浮栏中的 app 图标 | 切换最小化 / 还原 |
+| 右键悬浮栏中的 app 图标 | 关闭窗口 / 排除此 app |
+| 拖拽悬浮栏 | 移动位置 |
+| 点击悬浮栏锁图标 | 锁定 / 解锁位置 |
+| 点击菜单栏图标 | 开关指示灯、开关悬浮栏、调整位置、退出 |
+
+## 常见问题
+
+**点击 Dock 没有反应** — 检查辅助功能权限。查看日志：`tail -f /tmp/nbw*.log`。
+
+**指示灯不显示** — 点击菜单栏图标，确认「程序坞状态灯」已勾选。
+
+**悬浮栏不见了** — 点击菜单栏图标 → 位置 → 选择任意预设位置即可找回。
+
+**已经授权了但依然不工作** — 如上所述，请重启电脑或注销重登录。
+
+## 从源码构建
+
+```bash
+xcode-select --install
+bash /Applications/NBWindows.app/Contents/Resources/build.sh
+```
+
+## 项目结构
+
+```
+NBWindows.app/
+└── Contents/
+    ├── Info.plist
+    ├── MacOS/
+    │   └── NBWindows
+    └── Resources/
+        ├── main.swift         # 全部源码（~1000 行）
+        ├── build.sh           # 一键构建 + 签名 + 重启
+        └── README.md
+```
 
 ## License
 
